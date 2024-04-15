@@ -41,18 +41,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Note: rust-toolchain.toml is needed only during development so they're removed before building.
-    - name: Remove rust-toolchain.toml
-      uses: JesseTG/rm@v1.0.0
-      with:
-        path: rust-toolchain.toml
-
-    # Note: .cargo dir is needed only during development so they're removed before building.
-    - name: Remove .cargo
-      uses: JesseTG/rm@v1.0.0
-      with:
-        path: .cargo
-
     - name: Cache cargo folder
       uses: actions/cache@v3
       with:
@@ -74,13 +62,4 @@ jobs:
 
     - name: Run tests
       shell: bash
-      if: (
-        !contains(matrix.platform.target, 'ios') &&
-        !contains(matrix.platform.target, 'wasm32'))
       run: cargo $CMD test --verbose --target ${{ matrix.platform.target }} $OPTIONS --features $FEATURES
-
-    - name: Lint with clippy
-      shell: bash
-      if: (matrix.rust_version == 'stable') && !contains(matrix.platform.options, '--no-default-features')
-      run: cargo clippy --all-targets --target ${{ matrix.platform.target }} $OPTIONS --features $FEATURES -- -Dwarnings
-

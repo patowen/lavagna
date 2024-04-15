@@ -1,15 +1,7 @@
 [package]
-name = "lavagna"
-version = "2.1.9"
-authors = ["Alessandro Pezzato <alessandro@pezzato.net>"]
+name = "proc-macro2-testing-for-lavagna"
+version = "0.1.0"
 edition = "2021"
-description = "The uncluttered blackboard"
-homepage = "https://github.com/alepez/lavagna"
-repository = "https://github.com/alepez/lavagna"
-readme = "README.md"
-license = "MIT OR Apache-2.0"
-include = ["src", "assets", "LICENSE*", "README.md"]
-rust-version = "1.76"
 
 [dependencies]
 proc-macro2 = "1.0.80"
