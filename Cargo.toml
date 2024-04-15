@@ -11,36 +11,8 @@ license = "MIT OR Apache-2.0"
 include = ["src", "assets", "LICENSE*", "README.md"]
 rust-version = "1.76"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-[dependencies.bevy]
-version = "0.13"
-default_features = false
-features = [
-  "bevy_asset",
-  "bevy_core_pipeline",
-  "bevy_render",
-  "bevy_sprite",
-  "bevy_text",
-  "bevy_ui",
-  "bevy_winit",
-  "x11",
-  "png",
-  "webgl2",
-]
-
 [dependencies]
-bevy_embedded_assets = "0.10"
-bevy_framepace = "0.15"
-bevy_pancam = "0.11"
-bevy_prototype_lyon = "0.11"
-bevy_matchbox = "0.9"
-ciborium = "0.2"
-rand = "0.8"
-serde = { version = "1.0", features = ["derive"] }
-
-# Statically disable verbosity level for tracing, to avoid bloating the binary
-log = { version = "0.4", features = ["max_level_debug", "release_max_level_error"] }
-tracing = { version = "0.1", features = ["max_level_debug", "release_max_level_error"] }
+proc-macro2 = "1.0.80"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
@@ -49,17 +21,3 @@ opt-level = 1
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
-
-[features]
-# Enabling this feature will enable dynamic linking of Bevy, for faster build
-quick-build = ["bevy/dynamic_linking"]
-
-# wasm only dependencies
-[target.wasm32-unknown-unknown.dependencies]
-tracing-wasm = "0.2"
-tracing = "0.1"
-web-sys = { version = "0.3", features = ["Window", "Location"] }
-
-# dependencies for all other targets
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-clap = { version = "4", features = ["derive"] }
