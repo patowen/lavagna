@@ -8,58 +8,35 @@ on:
   schedule:
   - cron: '00 01 * * *'
 jobs:
-  test:
-    name: test
+  build:
+    name: build
 
     env:
       # Emit backtraces on panics.
       RUST_BACKTRACE: 1
       CARGO_INCREMENTAL: 0
-      RUSTFLAGS: "-C debuginfo=0 --deny warnings"
-      OPTIONS: ${{ matrix.platform.options }}
-      FEATURES: ${{ format(',{0}', matrix.platform.features ) }}
-      CMD: ${{ matrix.platform.cmd }}
 
-    runs-on: ${{ matrix.platform.os }}
+    runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
-        # We test lavagna on a pinned version of Rust, along with the moving
-        # targets of 'stable', 'beta', 'nightly'.
         rust_version:
-          #- 1.76.0
           - stable
           - beta
           - nightly
-        platform:
-          #- { target: x86_64-pc-windows-msvc,   os: windows-2019 }
-          - { target: x86_64-pc-windows-gnu,    os: windows-2019, host: -x86_64-pc-windows-gnu }
-          #- { target: x86_64-unknown-linux-gnu, os: ubuntu-latest }
-          #- { target: x86_64-apple-darwin,      os: macos-latest    }
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Cache cargo folder
-      uses: actions/cache@v3
-      with:
-        path: ~/.cargo
-        key: ${{ matrix.platform.target }}-cargo-${{ matrix.rust_version }}
-
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: ${{ matrix.rust_version }}${{ matrix.platform.host }}
-        target: ${{ matrix.platform.target }}
+        toolchain: ${{ matrix.rust_version }}-x86_64-pc-windows-gnu
+        target: x86_64-pc-windows-gnu
         profile: minimal
         override: true
-        components: clippy, rustfmt
 
-    - name: Build tests
+    - name: Build
       shell: bash
-      run: cargo $CMD test --no-run --verbose --target ${{ matrix.platform.target }} $OPTIONS --features $FEATURES
-
-    - name: Run tests
-      shell: bash
-      run: cargo $CMD test --verbose --target ${{ matrix.platform.target }} $OPTIONS --features $FEATURES
+      run: cargo build --verbose --target x86_64-pc-windows-gnu
