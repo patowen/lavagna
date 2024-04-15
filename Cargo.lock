@@ -3,23 +3,5 @@
 version = 3
 
 [[package]]
-name = "proc-macro2"
-version = "1.0.80"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a56dea16b0a29e94408b9aa5e2940a4eedbd128a1ba20e8f7ae60fd3d465af0e"
-dependencies = [
- "unicode-ident",
-]
-
-[[package]]
 name = "proc-macro2-testing-for-lavagna"
 version = "0.1.0"
-dependencies = [
- "proc-macro2",
-]
-
-[[package]]
-name = "unicode-ident"
-version = "1.0.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b"

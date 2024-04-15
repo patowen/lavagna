@@ -2,6 +2,3 @@
 name = "proc-macro2-testing-for-lavagna"
 version = "0.1.0"
 edition = "2021"
-
-[dependencies]
-proc-macro2 = "1.0.80"
