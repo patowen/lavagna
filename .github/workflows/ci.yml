@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         rust_version:
-          - nightly-2024-02-22
-          - nightly-2024-02-25
+          - nightly-2024-02-26
+          - nightly-2024-02-27
           - nightly-2024-02-28
 
     steps:
