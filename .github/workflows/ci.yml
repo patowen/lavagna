@@ -23,7 +23,8 @@ jobs:
         rust_version:
           - nightly-2024-02-26
           - nightly-2024-02-27
-          - nightly-2024-02-28
+          - nightly
+          - beta
 
     steps:
     - name: Checkout repository
@@ -36,6 +37,10 @@ jobs:
         target: x86_64-pc-windows-gnu
         profile: minimal
         override: true
+
+    - name: Provide Rust Version
+      shell: bash
+      run: rustc --version --verbose
 
     - name: Build
       shell: bash
