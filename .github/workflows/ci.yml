@@ -27,14 +27,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Install Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust_version }}-x86_64-pc-windows-gnu
-        target: x86_64-pc-windows-gnu
-        profile: minimal
-        override: true
-
     - name: Provide environment information
       shell: bash
       run: |
@@ -44,7 +36,3 @@ jobs:
         which bash.exe
         gcc.exe --version
         x86_64-w64-mingw32-gcc.exe --version
-
-    - name: Build
-      shell: bash
-      run: cargo build --verbose --target x86_64-pc-windows-gnu
