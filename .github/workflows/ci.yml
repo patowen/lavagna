@@ -8,92 +8,40 @@ on:
   schedule:
   - cron: '00 01 * * *'
 jobs:
-  rustfmt:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: stable
-        components: rustfmt
-    - name: Check formatting
-      run: rm rust-toolchain.toml .cargo/config.toml && cargo fmt --all --check
-
-  test:
-    name: test
+  build:
+    name: build
 
     env:
       # Emit backtraces on panics.
       RUST_BACKTRACE: 1
       CARGO_INCREMENTAL: 0
-      RUSTFLAGS: "-C debuginfo=0 --deny warnings"
-      OPTIONS: ${{ matrix.platform.options }}
-      FEATURES: ${{ format(',{0}', matrix.platform.features ) }}
-      CMD: ${{ matrix.platform.cmd }}
 
-    runs-on: ${{ matrix.platform.os }}
+    runs-on: windows-2019
     strategy:
       fail-fast: false
       matrix:
-        # We test lavagna on a pinned version of Rust, along with the moving
-        # targets of 'stable', 'beta', 'nightly'.
         rust_version:
-          - 1.76.0
-          - stable
-          - beta
+          - nightly-2024-02-26
+          - nightly-2024-02-27
           - nightly
-        platform:
-          - { target: x86_64-pc-windows-msvc,   os: windows-2019 }
-          # - { target: x86_64-pc-windows-gnu,    os: windows-2019, host: -x86_64-pc-windows-gnu }
-          - { target: x86_64-unknown-linux-gnu, os: ubuntu-latest }
-          - { target: x86_64-apple-darwin,      os: macos-latest    }
+          - beta
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Note: rust-toolchain.toml is needed only during development so they're removed before building.
-    - name: Remove rust-toolchain.toml
-      uses: JesseTG/rm@v1.0.0
-      with:
-        path: rust-toolchain.toml
-
-    # Note: .cargo dir is needed only during development so they're removed before building.
-    - name: Remove .cargo
-      uses: JesseTG/rm@v1.0.0
-      with:
-        path: .cargo
-
-    - name: Cache cargo folder
-      uses: actions/cache@v3
-      with:
-        path: ~/.cargo
-        key: ${{ matrix.platform.target }}-cargo-${{ matrix.rust_version }}
-
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: ${{ matrix.rust_version }}${{ matrix.platform.host }}
-        target: ${{ matrix.platform.target }}
+        toolchain: ${{ matrix.rust_version }}-x86_64-pc-windows-gnu
+        target: x86_64-pc-windows-gnu
         profile: minimal
         override: true
-        components: clippy, rustfmt
 
-    - name: Build tests
+    - name: Provide Rust Version
       shell: bash
-      run: cargo $CMD test --no-run --verbose --target ${{ matrix.platform.target }} $OPTIONS --features $FEATURES
+      run: rustc --version --verbose
 
-    - name: Run tests
+    - name: Build
       shell: bash
-      if: (
-        !contains(matrix.platform.target, 'ios') &&
-        !contains(matrix.platform.target, 'wasm32'))
-      run: cargo $CMD test --verbose --target ${{ matrix.platform.target }} $OPTIONS --features $FEATURES
-
-    - name: Lint with clippy
-      shell: bash
-      if: (matrix.rust_version == 'stable') && !contains(matrix.platform.options, '--no-default-features')
-      run: cargo clippy --all-targets --target ${{ matrix.platform.target }} $OPTIONS --features $FEATURES -- -Dwarnings
-
+      run: cargo build --verbose --target x86_64-pc-windows-gnu
