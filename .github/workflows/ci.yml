@@ -20,6 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        rust_version:
+          - nightly
 
     steps:
     - name: Checkout repository
@@ -28,7 +30,7 @@ jobs:
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: nightly-x86_64-pc-windows-gnu
+        toolchain: ${{ matrix.rust_version }}-x86_64-pc-windows-gnu
         target: x86_64-pc-windows-gnu
         profile: minimal
         override: true
@@ -39,7 +41,7 @@ jobs:
         rustc --version --verbose
         which gcc.exe
         which x86_64-w64-mingw32-gcc.exe
-        which bash.exe
+        which .exe
 
     - name: Build
       shell: bash
