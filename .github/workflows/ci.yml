@@ -41,7 +41,9 @@ jobs:
         rustc --version --verbose
         which gcc.exe
         which x86_64-w64-mingw32-gcc.exe
-        which .exe
+        which bash.exe
+        gcc.exe --version
+        x86_64-w64-mingw32-gcc.exe --version
 
     - name: Build
       shell: bash
