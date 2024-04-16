@@ -20,11 +20,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust_version:
-          - nightly-2024-02-26
-          - nightly-2024-02-27
-          - nightly
-          - beta
 
     steps:
     - name: Checkout repository
@@ -33,14 +28,18 @@ jobs:
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: ${{ matrix.rust_version }}-x86_64-pc-windows-gnu
+        toolchain: nightly-x86_64-pc-windows-gnu
         target: x86_64-pc-windows-gnu
         profile: minimal
         override: true
 
-    - name: Provide Rust Version
+    - name: Provide environment information
       shell: bash
-      run: rustc --version --verbose
+      run: |
+        rustc --version --verbose
+        which gcc.exe
+        which x86_64-w64-mingw32-gcc.exe
+        which bash.exe
 
     - name: Build
       shell: bash
