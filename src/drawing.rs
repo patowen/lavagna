@@ -2,7 +2,7 @@
 #![allow(clippy::cast_precision_loss)]
 
 use crate::Chalk;
-use bevy::{prelude::*, render::view::NoFrustumCulling};
+use bevy::{math::NormedVectorSpace, prelude::*, render::view::NoFrustumCulling};
 
 use bevy_prototype_lyon::prelude::*;
 
@@ -30,6 +30,21 @@ fn update(
         stroke.color = chalk.color.into();
         stroke.options.line_width = chalk.line_width as f32;
 
+        if polyline.points.len() >= 2
+            && triggers_lyon_bug(
+                &[
+                    polyline.points[&polyline.points.len() - 2],
+                    polyline.points[&polyline.points.len() - 1],
+                    Vec2::new(chalk.x as f32, chalk.y as f32),
+                ],
+                chalk.line_width as f32 / 2.0,
+            )
+        {
+            let start_point = polyline.points[&polyline.points.len() - 1];
+            complete_pending_path(&mut polyline, &mut commands, &chalk, &time);
+            polyline.points.push(start_point);
+        }
+
         if updated {
             add_point(&mut polyline, &chalk);
         }
@@ -51,7 +66,7 @@ fn update(
     }
 }
 
-fn triggers_lyon_bug(points: &[Vec2]) -> bool {
+fn triggers_lyon_bug(points: &[Vec2], stroke_radius: f32) -> bool {
     assert!(points.len() == 3);
     // TODO: Figure out as clean a solution as possible for figuring this out.
     // It just needs to depend on the angle and the length of the two segments
@@ -63,7 +78,18 @@ fn triggers_lyon_bug(points: &[Vec2]) -> bool {
     // the minimum length of a segment. That turns out to be cot(theta/2). Now,
     // the question is whether this can be evaluated without trig and without
     // the risk of division by zero.
-    false
+
+    // The following should do the trick, but it can probably be cleaned up. I'm
+    // assuming that no segments have length zero.
+    let ray0 = points[0] - points[1];
+    let ray1 = points[2] - points[1];
+    let cos_angle = ray0.dot(ray1) / (ray0.norm() * ray1.norm());
+    let sqr_cos_half_angle = (cos_angle + 1.0) / 2.0;
+    let sqr_sin_half_angle = (1.0 - cos_angle) / 2.0;
+    let sqr_stroke_radius = stroke_radius * stroke_radius;
+
+    ray0.norm_squared() * sqr_sin_half_angle < sqr_cos_half_angle * sqr_stroke_radius
+        || ray1.norm_squared() * sqr_sin_half_angle < sqr_cos_half_angle * sqr_stroke_radius
 }
 
 fn add_point(polyline: &mut Polyline, chalk: &Chalk) {
