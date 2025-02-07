@@ -51,6 +51,21 @@ fn update(
     }
 }
 
+fn triggers_lyon_bug(points: &[Vec2]) -> bool {
+    assert!(points.len() == 3);
+    // TODO: Figure out as clean a solution as possible for figuring this out.
+    // It just needs to depend on the angle and the length of the two segments
+    // relative to the stroke width.
+
+    // The angle alone determines the intersection point. The distance from the
+    // intersection point to the corner for line width 1 should be
+    // 1/sin(theta/2). However, that's not the number we want. We instead want
+    // the minimum length of a segment. That turns out to be cot(theta/2). Now,
+    // the question is whether this can be evaluated without trig and without
+    // the risk of division by zero.
+    false
+}
+
 fn add_point(polyline: &mut Polyline, chalk: &Chalk) {
     let new_point = Vec2::new(chalk.x as f32, chalk.y as f32);
     polyline.points.push(new_point);
