@@ -2,7 +2,7 @@
 #![allow(clippy::cast_precision_loss)]
 
 use crate::Chalk;
-use bevy::prelude::*;
+use bevy::{prelude::*, render::view::NoFrustumCulling};
 
 use bevy_prototype_lyon::prelude::*;
 
@@ -87,7 +87,13 @@ fn complete_pending_path(
             spatial: transform.into(),
             ..default()
         },
-        Stroke::new(chalk.color, chalk.line_width as f32),
+        Stroke {
+            color: chalk.color.into(),
+            options: StrokeOptions::default()
+                .with_line_width(chalk.line_width as f32)
+                .with_line_join(LineJoin::Round)
+                .with_line_cap(LineCap::Round),
+        },
         Fill::color(Color::NONE),
         Completed,
     ));
@@ -95,7 +101,7 @@ fn complete_pending_path(
     polyline.points.clear();
 }
 
-pub(crate) fn make_chalk(chalk: Chalk) -> (ShapeBundle, Stroke, Fill, Polyline, Pending, Chalk) {
+pub(crate) fn make_chalk(chalk: Chalk) -> impl Bundle {
     // An empty path
     let path = PathBuilder::new().build();
 
@@ -111,10 +117,17 @@ pub(crate) fn make_chalk(chalk: Chalk) -> (ShapeBundle, Stroke, Fill, Polyline, 
             spatial: transform.into(),
             ..default()
         },
-        Stroke::new(Color::WHITE, 10.0),
+        Stroke {
+            color: Color::WHITE,
+            options: StrokeOptions::default()
+                .with_line_width(10.0)
+                .with_line_join(LineJoin::Round)
+                .with_line_cap(LineCap::Round),
+        },
         Fill::color(Color::NONE),
         Polyline::default(),
         Pending,
+        NoFrustumCulling,
         chalk,
     )
 }

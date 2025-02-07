@@ -3,7 +3,7 @@
 use crate::drawing::make_chalk;
 use crate::Chalk;
 use crate::MainCamera;
-use bevy::color::palettes::css::{BLUE, GREEN, ORANGE, RED, TURQUOISE, WHITE, YELLOW};
+use bevy::color::palettes::css::{BLACK, BLUE, GREEN, ORANGE, RED, TURQUOISE, WHITE, YELLOW};
 use std::cmp::max;
 use std::cmp::min;
 
@@ -237,7 +237,7 @@ fn update_chalk(
     }
 }
 
-const COLORS: [Srgba; 7] = [WHITE, BLUE, TURQUOISE, GREEN, YELLOW, ORANGE, RED];
+const COLORS: [Srgba; 8] = [WHITE, BLUE, TURQUOISE, GREEN, YELLOW, ORANGE, RED, BLACK];
 
 fn next_color(curr_color: Srgba) -> Srgba {
     if let Some(next_color) = COLORS
