@@ -45,6 +45,7 @@ pub fn run(opt: Opt) {
             // Avoid scrolling on mobile
             prevent_default_event_handling: true,
             canvas: Some("#bevy".to_owned()),
+            fit_canvas_to_parent: true,
             ..default()
         }),
         ..default()
