@@ -25,14 +25,20 @@ fn update(
     time: Res<Time>,
 ) {
     for (chalk, mut path, mut stroke, mut polyline) in &mut chalk_q {
-        let updated = chalk.pressed && chalk.updated;
+        let updated = chalk.pressed && chalk.updated
+        
+        // For some reason, "chalk.updated" is not a reliable way to tell whether
+        // the chalk has moved since last frame. The following code changes "updated"
+        // to false if there's been no change.
+            && polyline.points.last() != Some(&Vec2::new(chalk.x as f32, chalk.y as f32));
 
         stroke.color = chalk.color.into();
         stroke.options.line_width = chalk.line_width as f32;
 
-        if polyline.points.len() >= 2
+        if updated
+            && polyline.points.len() >= 2
             && triggers_lyon_bug(
-                &[
+                [
                     polyline.points[&polyline.points.len() - 2],
                     polyline.points[&polyline.points.len() - 1],
                     Vec2::new(chalk.x as f32, chalk.y as f32),
@@ -66,30 +72,22 @@ fn update(
     }
 }
 
-fn triggers_lyon_bug(points: &[Vec2], stroke_radius: f32) -> bool {
-    assert!(points.len() == 3);
-    // TODO: Figure out as clean a solution as possible for figuring this out.
-    // It just needs to depend on the angle and the length of the two segments
-    // relative to the stroke width.
-
-    // The angle alone determines the intersection point. The distance from the
-    // intersection point to the corner for line width 1 should be
-    // 1/sin(theta/2). However, that's not the number we want. We instead want
-    // the minimum length of a segment. That turns out to be cot(theta/2). Now,
-    // the question is whether this can be evaluated without trig and without
-    // the risk of division by zero.
-
-    // The following should do the trick, but it can probably be cleaned up. I'm
-    // assuming that no segments have length zero.
+fn triggers_lyon_bug(points: [Vec2; 3], stroke_radius: f32) -> bool {
     let ray0 = points[0] - points[1];
     let ray1 = points[2] - points[1];
-    let cos_angle = ray0.dot(ray1) / (ray0.norm() * ray1.norm());
-    let sqr_cos_half_angle = (cos_angle + 1.0) / 2.0;
-    let sqr_sin_half_angle = (1.0 - cos_angle) / 2.0;
+    let max_dot_product = ray0.norm() * ray1.norm();
+    let dot_product = ray0.dot(ray1);
+
+    // These two variables have the same factor of proportionality.
+    let sqr_cos_half_angle_proportional = max_dot_product + dot_product;
+    let sqr_sin_half_angle_proportional = max_dot_product - dot_product;
+
     let sqr_stroke_radius = stroke_radius * stroke_radius;
 
-    ray0.norm_squared() * sqr_sin_half_angle < sqr_cos_half_angle * sqr_stroke_radius
-        || ray1.norm_squared() * sqr_sin_half_angle < sqr_cos_half_angle * sqr_stroke_radius
+    ray0.norm_squared() * sqr_sin_half_angle_proportional
+        <= sqr_cos_half_angle_proportional * sqr_stroke_radius
+        || ray1.norm_squared() * sqr_sin_half_angle_proportional
+            <= sqr_cos_half_angle_proportional * sqr_stroke_radius
 }
 
 fn add_point(polyline: &mut Polyline, chalk: &Chalk) {
